@@ -95,6 +95,20 @@ describe("Pi model catalog", () => {
     ).toBe(false);
   });
 
+  it("adds a configured Local model that is not yet registered via RAKAZO_LOCAL_MODELS", async () => {
+    vi.stubEnv("PI_DEFAULT_PROVIDER", "local");
+    vi.stubEnv("PI_DEFAULT_MODEL", "MiniMax-M3");
+    vi.stubEnv("RAKAZO_LOCAL_MODELS", "");
+    vi.resetModules();
+
+    const { listPiCatalog: listConfiguredCatalog } = await import("./pi-models.js");
+    expect(listConfiguredCatalog()[0]).toMatchObject({
+      provider: "local",
+      id: "MiniMax-M3",
+      label: "MiniMax-M3",
+    });
+  });
+
   it('never labels an older model "latest" and keeps aliases distinct from snapshots', () => {
     const catalog = listPiCatalog();
     const label = (id: string) =>

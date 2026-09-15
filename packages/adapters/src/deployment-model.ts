@@ -9,13 +9,26 @@ export function resolveDeploymentModel(env: NodeJS.ProcessEnv = process.env) {
   // A row per provider that ships a deployment key. A third one adds a row here, not a
   // branch at each call site — and an unknown provider gets no key rather than another
   // vendor's, which a ternary on one provider would not give.
+  const localKey =
+    env.RAKAZO_LOCAL_API_KEY?.trim() ||
+    env.ANTHROPIC_API_KEY?.trim() ||
+    env.OPENAI_API_KEY?.trim() ||
+    // Local/Ollama servers ignore the header; keep a placeholder so Models treats the
+    // provider as configured when RAKAZO_LOCAL_MODELS is set.
+    (env.RAKAZO_LOCAL_MODELS?.trim() ? "local" : undefined);
   const keys: Record<string, string | undefined> = {
     openrouter: env.OPENROUTER_API_KEY,
     anthropic: env.ANTHROPIC_API_KEY,
+    local: localKey,
   };
+  const firstLocalModel = (env.RAKAZO_LOCAL_MODELS ?? "")
+    .split(",")
+    .map((id) => id.trim())
+    .find((id) => id.length > 0);
   const models: Record<string, string> = {
     openrouter: "deepseek/deepseek-v4-flash-0731",
     anthropic: "claude-sonnet-5",
+    local: firstLocalModel || "MiniMax-M3",
   };
   return {
     provider,

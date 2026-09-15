@@ -75,6 +75,9 @@ function buildPiCatalog(): PiCatalogEntry[] {
 
   const envDefaultModel = process.env.PI_DEFAULT_MODEL?.trim();
   const envDefaultProvider = process.env.PI_DEFAULT_PROVIDER?.trim() || "openrouter";
+  // OpenRouter and Local can both synthesize a catalog row from PI_DEFAULT_* when the
+  // static/env-registered catalog does not already include that model id. Anthropic and
+  // other hosted providers stay closed (runtime cannot invent their wire models).
   if (
     envDefaultProvider === "openrouter" &&
     envDefaultModel &&
@@ -86,6 +89,23 @@ function buildPiCatalog(): PiCatalogEntry[] {
       id: envDefaultModel,
       label: catalogModelLabel(envDefaultModel),
       billing: `Configured via PI_DEFAULT_MODEL (${envDefaultModel}).`,
+      auth: "api-key",
+      subscription: false,
+      reasoning: true,
+      thinkingLevels: ["off", "minimal", "low", "medium", "high"],
+    });
+  }
+  if (
+    envDefaultProvider === LOCAL_PROVIDER_ID &&
+    envDefaultModel &&
+    !models.getModel(LOCAL_PROVIDER_ID, envDefaultModel)
+  ) {
+    entries.unshift({
+      provider: LOCAL_PROVIDER_ID,
+      providerName: "Local (Ollama / LM Studio)",
+      id: envDefaultModel,
+      label: catalogModelLabel(envDefaultModel),
+      billing: `Configured via PI_DEFAULT_MODEL (${envDefaultModel}) on the deployment Local endpoint.`,
       auth: "api-key",
       subscription: false,
       reasoning: true,
