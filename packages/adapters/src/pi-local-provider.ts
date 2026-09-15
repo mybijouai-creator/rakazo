@@ -99,7 +99,8 @@ export function localProvider(): Provider | undefined {
         name: "Local model server",
         resolve: async () => {
           const apiKey =
-            process.env.RAKAZO_LOCAL_API_KEY?.trim() ||
+            process.env.RAKAZO_LOCAL_MODELS_API_KEY?.trim() ||
+            process.env.MINIMAX_API_KEY?.trim() ||
             process.env.ANTHROPIC_API_KEY?.trim() ||
             process.env.OPENAI_API_KEY?.trim() ||
             "local";

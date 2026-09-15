@@ -82,17 +82,17 @@ describe("Pi model catalog", () => {
     });
   });
 
-  it("does not advertise a synthetic model for providers the runtime cannot synthesize", async () => {
+  it("adds a configured Anthropic model id that is newer than the static catalog", async () => {
     vi.stubEnv("PI_DEFAULT_PROVIDER", "anthropic");
-    vi.stubEnv("PI_DEFAULT_MODEL", "future/unknown-model");
+    vi.stubEnv("PI_DEFAULT_MODEL", "MiniMax-M3");
     vi.resetModules();
 
     const { listPiCatalog: listConfiguredCatalog } = await import("./pi-models.js");
-    expect(
-      listConfiguredCatalog().some(
-        (entry) => entry.provider === "anthropic" && entry.id === "future/unknown-model",
-      ),
-    ).toBe(false);
+    expect(listConfiguredCatalog()[0]).toMatchObject({
+      provider: "anthropic",
+      id: "MiniMax-M3",
+      label: "MiniMax-M3",
+    });
   });
 
   it("adds a configured Local model that is not yet registered via RAKAZO_LOCAL_MODELS", async () => {
