@@ -97,10 +97,18 @@ export function localProvider(): Provider | undefined {
     auth: {
       apiKey: {
         name: "Local model server",
-        resolve: async () => ({
-          auth: { apiKey: "local", baseUrl: localBaseUrl() },
-          source: "local model server",
-        }),
+        resolve: async () => {
+          const apiKey =
+            process.env.RAKAZO_LOCAL_MODELS_API_KEY?.trim() ||
+            process.env.MINIMAX_API_KEY?.trim() ||
+            process.env.ANTHROPIC_API_KEY?.trim() ||
+            process.env.OPENAI_API_KEY?.trim() ||
+            "local";
+          return {
+            auth: { apiKey, baseUrl: localBaseUrl() },
+            source: "local model server",
+          };
+        },
       },
     },
     models: ids.map(localModel),

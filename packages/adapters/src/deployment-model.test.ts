@@ -20,4 +20,31 @@ describe("resolveDeploymentModel", () => {
       resolveDeploymentModel({ OPENROUTER_API_KEY: "or-key", PI_DEFAULT_PROVIDER: "anthropic" }),
     ).toEqual({ provider: "anthropic", model: "claude-sonnet-5", key: undefined });
   });
+
+  it("supports Local as a deployment default with MiniMax-M3", () => {
+    expect(
+      resolveDeploymentModel({
+        PI_DEFAULT_PROVIDER: "local",
+        PI_DEFAULT_MODEL: "MiniMax-M3",
+        RAKAZO_LOCAL_MODELS: "MiniMax-M3",
+        RAKAZO_LOCAL_MODELS_API_KEY: "sk-local-test",
+      }),
+    ).toEqual({
+      provider: "local",
+      model: "MiniMax-M3",
+      key: "sk-local-test",
+    });
+    // Falls back to MINIMAX_API_KEY and the built-in local model id.
+    expect(
+      resolveDeploymentModel({
+        PI_DEFAULT_PROVIDER: "local",
+        RAKAZO_LOCAL_MODELS: "MiniMax-M3",
+        MINIMAX_API_KEY: "sk-mm-fallback",
+      }),
+    ).toEqual({
+      provider: "local",
+      model: "MiniMax-M3",
+      key: "sk-mm-fallback",
+    });
+  });
 });
